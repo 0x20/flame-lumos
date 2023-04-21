@@ -6,16 +6,6 @@ except:
     print("noLumos")
 import time
 
-pygame.init()
-
-
-def matrix_to_frame(self, matrix):
-    frame = ''
-    for row in matrix:
-        for val in row:
-            r, g, b = val
-            frame += f'{r:02x}{g:02x}{b:02x}'
-    return frame
 
 
 class Display:
@@ -25,12 +15,24 @@ class Display:
         self.height = height
         self.scale = scale
         self.fps = fps
+        self.hex_list = [''] * (width * height)
 
         if self.destination == 'pygame':
+            pygame.init()
             self.screen = pygame.display.set_mode(
                 (width * scale, height * scale))
             pygame.display.set_caption(caption)
             self.clock = pygame.time.Clock()
+
+    def matrix_to_frame(self, matrix):
+        hex_list = self.hex_list
+        idx = 0
+        for row in matrix:
+            for val in row:
+                r, g, b = val
+                hex_list[idx] = f'{r:02x}{g:02x}{b:02x}'
+                idx += 1
+        return ''.join(hex_list)
 
     def push(self, color_matrix):
         if self.destination == 'pygame':
