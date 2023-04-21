@@ -2,7 +2,10 @@ import numpy as np
 import time
 import pygame
 import argparse
-import lumos
+try:
+    import lumos
+except:
+    print("noLumos")
 
 
 def generate_flame_matrix(height, width):
@@ -60,7 +63,7 @@ def show_frame_lumos(frame, width, height):
 
 
 def main(display_method):
-    height, width, scale = 10, 120, 5
+    height, width, scale = 10, 120, 15
     screen = ''
 
     if display_method == 'pygame':
