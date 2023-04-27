@@ -39,10 +39,19 @@ class Display:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return False
+            self.screen.fill((0, 0, 0))
+
             for y, row in enumerate(color_matrix):
                 for x, val in enumerate(row):
-                    pygame.draw.rect(self.screen, val, pygame.Rect(
+                    r, g, b = val
+                    # Clip color values to the valid range
+                    r = max(0, min(r, 255))
+                    g = max(0, min(g, 255))
+                    b = max(0, min(b, 255))
+
+                    pygame.draw.rect(self.screen, (r, g, b), pygame.Rect(
                         x * self.scale, y * self.scale, self.scale, self.scale))
+
 
             pygame.display.flip()
             self.clock.tick(self.fps)  # 30 FPS
