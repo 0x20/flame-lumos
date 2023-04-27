@@ -40,6 +40,23 @@ def generate_game_of_life_matrix(height, width):
         [0, 1, 1, 1, 1]
     ], dtype=np.float64)
 
+    # Define the Gosper Glider Gun pattern
+    glider_gun = np.array([
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+        [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    ])
+
+    # Add the glider guns to the matrix
+    matrix[5:5+glider_gun.shape[0], 5:5+glider_gun.shape[1]] = glider_gun
+    # matrix[25:25+glider_gun.shape[0], 25:25+glider_gun.shape[1]] = glider_gun
+
     # Place multiple gliders in the matrix
     matrix[0:3, 0:3] = glider
     matrix[0:3, 10:13] = glider
@@ -54,70 +71,6 @@ def generate_game_of_life_matrix(height, width):
     matrix[6:10, 60:65] = lw_spaceship
 
     return matrix
-
-
-# def generate_game_of_life_matrix(height, width):
-#     # Start with an empty matrix
-#     matrix = np.zeros((height, width), dtype=int)
-
-#     # Define a glider
-#     glider = np.array([
-#         [0, 1, 0],
-#         [0, 0, 1],
-#         [1, 1, 1]
-#     ], dtype=np.float64)
-
-#     # Define a Beacon
-#     beacon = np.array([
-#         [1, 1, 0, 0],
-#         [1, 1, 0, 0],
-#         [0, 0, 1, 1],
-#         [0, 0, 1, 1]
-#     ], dtype=np.float64)
-
-#     # Place multiple gliders in the matrix
-#     matrix[0:3, 0:3] = glider
-#     matrix[0:3, 10:13] = glider
-#     matrix[0:3, 20:23] = glider
-#     matrix[0:3, 30:33] = glider
-#     matrix[0:3, 40:43] = glider
-#     matrix[0:3, 50:53] = glider
-
-#     # Place Beacon at the right end
-#     matrix[6:10, 116:120] = beacon
-
-#     return matrix
-
-
-# def generate_game_of_life_matrix(height, width):
-#     # Start with an empty matrix
-#     matrix = np.zeros((height, width), dtype=int)
-
-#     # Define a glider
-#     glider = np.array([
-#         [0, 1, 0],
-#         [0, 0, 1],
-#         [1, 1, 1]
-#     ], dtype=np.float64)
-
-#     # Place multiple gliders in the matrix
-#     matrix[0:3, 0:3] = glider
-#     matrix[0:3, 10:13] = glider
-#     matrix[0:3, 20:23] = glider
-#     matrix[0:3, 30:33] = glider
-#     matrix[0:3, 40:43] = glider
-#     matrix[0:3, 50:53] = glider
-#     matrix[0:3, 60:63] = glider
-#     matrix[0:3, 70:73] = glider
-#     matrix[0:3, 80:83] = glider
-#     matrix[0:3, 90:93] = glider
-#     matrix[0:3, 100:103] = glider
-#     matrix[0:3, 110:113] = glider
-
-    return matrix
-
-# def generate_game_of_life_matrix(height, width):
-#     return np.random.choice([0, 1], size=(height, width), p=[0.5, 0.5])
 
 
 def game_of_life_matrix_to_frame(matrix, gradient):
@@ -148,19 +101,38 @@ def generate_random_color_with_min_distance(reference_color, min_distance):
 #     matrix = (neighbors == 3) | (matrix & (neighbors == 2))
 #     return matrix
 
+def convolve2d(matrix, kernel):
+    # Matrix and kernel dimensions
+    m, n = matrix.shape
+    ky, kx = kernel.shape
+
+    # Calculate output dimensions
+    y = m - ky + 1
+    x = n - kx + 1
+
+    # Zero pad the matrix
+    padded_matrix = np.pad(
+        matrix, [(ky//2, ky//2), (kx//2, kx//2)], mode='wrap')
+
+    # Initialize output matrix
+    output = np.zeros((y, x))
+
+    # Convolution operation
+    for i in range(y):
+        for j in range(x):
+            output[i, j] = np.sum(padded_matrix[i:i+ky, j:j+kx] * kernel)
+
+    return output
+
 
 def update_game_of_life_matrix(matrix):
-    # Compute the sum of the neighbors using convolution
-    kernel = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
-    neighbors = scipy.signal.convolve2d(
-        matrix, kernel, mode='same', boundary='wrap')
-
-    # Apply the rules of Game of Life
-    matrix = np.where((neighbors == 3) | (
-        (matrix == 1) & (neighbors == 2)), 1, 0)
-
+    neighbors = np.zeros(matrix.shape, dtype=int)
+    for y in range(-1, 2):
+        for x in range(-1, 2):
+            if y != 0 or x != 0:
+                neighbors += np.roll(np.roll(matrix, y, axis=0), x, axis=1)
+    matrix = ((neighbors == 3) | (matrix & (neighbors == 2))).astype(int)
     return matrix
-
 
 def show_frame_pygame(frame, width, height, scale, screen):
     frame_list = [frame[i:i+6] for i in range(0, len(frame), 6)]
@@ -248,7 +220,7 @@ def hsv_to_rgb(h, s, v):
 
 
 def main(display_method):
-    height, width, scale = 20, 240, 5  # Increase the grid size
+    height, width, scale = 20, 140, 5  # Increase the grid size
     display_height, display_width = 10, 120  # Define the size of the display
     screen = ''
 
@@ -283,7 +255,7 @@ def main(display_method):
         # print("increment ", color1_hsv[0], color1_hsv[0] +
         #       float(fc) / 1000.0, (color1_hsv[0] + float(fc) / 1000.0) % 1)
         # print("after ",  (color1_hsv[0] + float(fc) / 1000.0) % 1)
-        color1_hsv = ((color1_hsv[0] + 1 / 10.0) %
+        color1_hsv = ((color1_hsv[0] + 1 / 100.0) %
                       1, color1_hsv[1], color1_hsv[2])
         color1 = np.array(hsv_to_rgb(*color1_hsv))
         color2_hsv = rgb_to_hsv(*color2)
@@ -310,66 +282,6 @@ def main(display_method):
             show_frame_lumos(frame, display_width, display_height)
             # time.sleep(1/40)  # 30 FPS
 
-    if display_method == 'pygame':
-        pygame.quit()
-
-
-# def main(display_method):
-#     height, width, scale=10, 120, 5
-#     screen=''
-
-#     color1=np.random.uniform(size=3)
-#     min_distance=0.5
-#     color2=generate_random_color_with_min_distance(color1, min_distance)
-
-#     if display_method == 'pygame':
-#         # Initialize pygame
-#         pygame.init()
-#         screen=pygame.display.set_mode((width * scale, height * scale))
-#         pygame.display.set_caption('Flame Animation')
-#         clock=pygame.time.Clock()
-
-#     flame_matrix=generate_game_of_life_matrix(height, width)
-
-#     running=True
-#     fc=999
-#     while running:
-#         if display_method == 'pygame':
-#             for event in pygame.event.get():
-#                 if event.type == pygame.QUIT:
-#                     running=False
-
-#         fc += 1
-
-#         # print fc
-
-#         # running = False
-#         # Shift hue for the gradient colors
-#         color1_hsv=rgb_to_hsv(*color1)
-#         color1_hsv=((color1_hsv[0] + float(fc) / 1000.0) %
-#                       1, color1_hsv[1], color1_hsv[2])
-#         color1=np.array(hsv_to_rgb(*color1_hsv))
-#         color2_hsv=rgb_to_hsv(*color2)
-#         color2_hsv=((color2_hsv[0] + float(fc) / 1000.0) %
-#                       1, color2_hsv[1], color2_hsv[2])
-#         color2=np.array(hsv_to_rgb(*color2_hsv))
-
-#         gradient=np.array([[color1 + (color2 - color1) * (float(x + y) /
-#                             (width + height - 2)) for x in range(width)] for y in range(height)])
-#         flame_matrix=update_game_of_life_matrix(flame_matrix)
-#         frame=game_of_life_matrix_to_frame(flame_matrix, gradient)
-
-#         if display_method == 'pygame':
-#             screen.fill((0, 0, 0))
-#             show_frame_pygame(frame, width, height, scale, screen)
-#             pygame.display.flip()
-#             clock.tick(30)  # 30 FPS
-#         elif display_method == 'lumos':
-#             lumos.push(frame)
-#             # time.sleep(1/40)  # 30 FPS
-
-#     if display_method == 'pygame':
-#         pygame.quit()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
